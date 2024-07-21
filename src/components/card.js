@@ -1,10 +1,15 @@
-import { openModal } from "./modal.js";
-import { imagePopup } from "../index.js";
+/*import { imagePopup, handleImageClick } from "../index.js";
+import { openModal } from "./modal.js";*/
 
 const cardTemplate = document.querySelector("#card-template").content;
 const cardsContainer = document.querySelector(".places__list");
 
-function createCard(cardData, deleteCallback, imageOpenClick, cardLikeActive) {
+function createCard(
+  cardData,
+  deleteCallback,
+  handleImageClick,
+  handleLikeactive
+) {
   const cardElement = cardTemplate.cloneNode(true).querySelector(".card");
   const cardTitle = cardElement.querySelector(".card__title");
   const cardImage = cardElement.querySelector(".card__image");
@@ -14,24 +19,15 @@ function createCard(cardData, deleteCallback, imageOpenClick, cardLikeActive) {
   cardImage.src = cardData.link;
   cardImage.alt = cardData.name;
 
-    function imageOpenClick () {
-      openModal(imagePopup);
-      const popupImage = imagePopup.querySelector(".popup__image");
-      const popupCaption = imagePopup.querySelector(".popup__caption");
-  
-      popupImage.src = cardData.link;
-      popupImage.alt = cardData.name;
-      popupCaption.textContent = cardData.name;
-    }
-  cardImage.addEventListener("click", imageOpenClick);
+  cardImage.addEventListener("click", () => handleImageClick(cardData));
 
-  function cardLikeActive (evt) {
+  function handleLikeactive(evt) {
     evt.target.classList.toggle("card__like-button_is-active");
   }
-  
+
   cardElement
     .querySelector(".card__like-button")
-    .addEventListener("click", cardLikeActive);
+    .addEventListener("click", handleLikeactive);
 
   deleteButton.addEventListener("click", () => {
     deleteCallback(cardElement);
@@ -44,10 +40,10 @@ const deleteCard = (cardElement) => {
   cardElement.remove();
 };
 
-const renderCards = (cards, deleteHandler) => {
+const renderCards = (cards, deleteHandler, handleImageClick) => {
   const fragment = document.createDocumentFragment();
   cards.forEach((cardData) => {
-    const cardElement = createCard(cardData, deleteHandler);
+    const cardElement = createCard(cardData, deleteHandler, handleImageClick);
     fragment.append(cardElement);
   });
   cardsContainer.append(fragment);
