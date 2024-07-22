@@ -18,7 +18,7 @@ function createCard(
 
   cardImage.addEventListener("click", () => handleImageClick(cardData));
 
-  function sendLike(evt) {
+  const sendLike = (evt) => {
     evt.target.classList.toggle("card__like-button_is-active");
   }
 
