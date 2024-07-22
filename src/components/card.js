@@ -1,6 +1,3 @@
-/*import { imagePopup, handleImageClick } from "../index.js";
-import { openModal } from "./modal.js";*/
-
 const cardTemplate = document.querySelector("#card-template").content;
 const cardsContainer = document.querySelector(".places__list");
 
@@ -21,13 +18,13 @@ function createCard(
 
   cardImage.addEventListener("click", () => handleImageClick(cardData));
 
-  function handleLikeactive(evt) {
+  function sendLike(evt) {
     evt.target.classList.toggle("card__like-button_is-active");
   }
 
   cardElement
     .querySelector(".card__like-button")
-    .addEventListener("click", handleLikeactive);
+    .addEventListener("click", sendLike);
 
   deleteButton.addEventListener("click", () => {
     deleteCallback(cardElement);
@@ -36,14 +33,18 @@ function createCard(
   return cardElement;
 }
 
+export function handleLikeactive(evt) {
+  evt.target.classList.toggle('card__like-button_is-active');
+}
+
 const deleteCard = (cardElement) => {
   cardElement.remove();
 };
 
-const renderCards = (cards, deleteHandler, handleImageClick) => {
+const renderCards = (cards, deleteHandler, handleImageClick, handleLikeactive) => {
   const fragment = document.createDocumentFragment();
   cards.forEach((cardData) => {
-    const cardElement = createCard(cardData, deleteHandler, handleImageClick);
+    const cardElement = createCard(cardData, deleteHandler, handleImageClick, handleLikeactive);
     fragment.append(cardElement);
   });
   cardsContainer.append(fragment);

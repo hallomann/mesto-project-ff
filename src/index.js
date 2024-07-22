@@ -1,6 +1,6 @@
 import "./pages/index.css";
 import { initialCards } from "./components/cards.js";
-import { createCard, deleteCard } from "./components/card.js";
+import { createCard, deleteCard, handleLikeactive } from "./components/card.js";
 import {
   openModal,
   closeModal,
@@ -47,17 +47,14 @@ export {
 
 function handleImageClick(cardData) {
   openModal(imagePopup);
-  const popupImage = imagePopup.querySelector(".popup__image");
-  const popupCaption = imagePopup.querySelector(".popup__caption");
-
   popupImage.src = cardData.link;
   popupImage.alt = cardData.name;
   popupCaption.textContent = cardData.name;
 }
 
 // Вывести карточки на страницу
-initialCards.forEach((cardData) => {
-  const cardElement = createCard(cardData, deleteCard, handleImageClick);
+initialCards.forEach((cardData, handleLikeactive) => {
+  const cardElement = createCard(cardData, deleteCard, handleImageClick, handleLikeactive);
   placesList.appendChild(cardElement);
 });
 
@@ -87,7 +84,7 @@ export function handleProfileFormSubmit(
 
 function renderCard(item, callbacks, method = "prepend") {
   // создаем карточку, передавая обработчики в виде объекта `callbacks`
-  const cardElement = createCard(item, callbacks);
+  const cardElement = createCard(item, callbacks, handleImageClick, handleLikeactive);
   // вставляем карточку, используя метод (вставится `prepend` или `append`)
   placesList[method](cardElement);
 }
@@ -101,14 +98,17 @@ export function handleNewCardFormSubmit(
   deleteCard,
   placesList,
   newCardPopup,
-  newCardForm
+  newCardForm,
+  closeModal,
+  handleImageClick,
 ) {
   evt.preventDefault();
   const titleValue = cardTitleInput.value;
   const linkValue = cardLinkInput.value;
   const newCardData = { name: titleValue, link: linkValue };
-  const newCardElement = createCard(newCardData, deleteCard);
+  const newCardElement = createCard(newCardData, deleteCard, handleImageClick);
   placesList.prepend(newCardElement);
+  closeModal(newCardPopup);
   closeModal(newCardPopup);
   newCardForm.reset();
 }
@@ -150,6 +150,8 @@ newCardForm.addEventListener("submit", (evt) =>
     deleteCard,
     placesList,
     newCardPopup,
-    newCardForm
+    newCardForm,
+    closeModal,
+    handleImageClick,
   )
 );
