@@ -1,6 +1,6 @@
 import "./pages/index.css";
 import { initialCards } from "./components/cards.js";
-import { createCard, deleteCard, handleLikeactive } from "./components/card.js";
+import { createCard, deleteCard, toggleLike } from "./components/card.js";
 import {
   openModal,
   closeModal,
@@ -53,8 +53,8 @@ function handleImageClick(cardData) {
 }
 
 // Вывести карточки на страницу
-initialCards.forEach((cardData, handleLikeactive) => {
-  const cardElement = createCard(cardData, deleteCard, handleImageClick, handleLikeactive);
+initialCards.forEach((cardData) => {
+  const cardElement = createCard(cardData, deleteCard, handleImageClick, toggleLike);
   placesList.appendChild(cardElement);
 });
 
@@ -82,12 +82,10 @@ export function handleProfileFormSubmit(
   closeModal(profileEditPopup);
 }
 
-function renderCard(item, callbacks, method = "prepend") {
-  // создаем карточку, передавая обработчики в виде объекта `callbacks`
-  const cardElement = createCard(item, callbacks, handleImageClick, handleLikeactive);
-  // вставляем карточку, используя метод (вставится `prepend` или `append`)
+function renderCard(item, method = "prepend") {
+  const cardElement = createCard(item, deleteCard, handleImageClick, toggleLike);
   placesList[method](cardElement);
-}
+} 
 
 // Форма добавления карточки
 export function handleNewCardFormSubmit(
@@ -101,12 +99,13 @@ export function handleNewCardFormSubmit(
   newCardForm,
   closeModal,
   handleImageClick,
+  toggleLike
 ) {
   evt.preventDefault();
   const titleValue = cardTitleInput.value;
   const linkValue = cardLinkInput.value;
   const newCardData = { name: titleValue, link: linkValue };
-  const newCardElement = createCard(newCardData, deleteCard, handleImageClick);
+  const newCardElement = createCard(newCardData, deleteCard, handleImageClick, toggleLike);
   placesList.prepend(newCardElement);
   closeModal(newCardPopup);
   closeModal(newCardPopup);
@@ -153,5 +152,6 @@ newCardForm.addEventListener("submit", (evt) =>
     newCardForm,
     closeModal,
     handleImageClick,
+    toggleLike
   )
 );

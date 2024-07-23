@@ -1,11 +1,14 @@
 const cardTemplate = document.querySelector("#card-template").content;
 const cardsContainer = document.querySelector(".places__list");
+export function toggleLike(evt) {
+  evt.target.classList.toggle('card__like-button_is-active');
+}
 
 function createCard(
   cardData,
   deleteCallback,
   handleImageClick,
-  handleLikeactive
+  toggleLike
 ) {
   const cardElement = cardTemplate.cloneNode(true).querySelector(".card");
   const cardTitle = cardElement.querySelector(".card__title");
@@ -18,13 +21,9 @@ function createCard(
 
   cardImage.addEventListener("click", () => handleImageClick(cardData));
 
-  const sendLike = (evt) => {
-    evt.target.classList.toggle("card__like-button_is-active");
-  }
-
   cardElement
     .querySelector(".card__like-button")
-    .addEventListener("click", sendLike);
+    .addEventListener("click", toggleLike);
 
   deleteButton.addEventListener("click", () => {
     deleteCallback(cardElement);
@@ -33,18 +32,14 @@ function createCard(
   return cardElement;
 }
 
-export function handleLikeactive(evt) {
-  evt.target.classList.toggle('card__like-button_is-active');
-}
-
 const deleteCard = (cardElement) => {
   cardElement.remove();
 };
 
-const renderCards = (cards, deleteHandler, handleImageClick, handleLikeactive) => {
+const renderCards = (cards, deleteHandler, handleImageClick, toggleLike) => {
   const fragment = document.createDocumentFragment();
   cards.forEach((cardData) => {
-    const cardElement = createCard(cardData, deleteHandler, handleImageClick, handleLikeactive);
+    const cardElement = createCard(cardData, deleteHandler, handleImageClick, toggleLike);
     fragment.append(cardElement);
   });
   cardsContainer.append(fragment);
