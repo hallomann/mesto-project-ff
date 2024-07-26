@@ -66,7 +66,7 @@ profileEditButton.addEventListener("click", () => {
 });
 
 // Редактирование имени и информации о себе
-export function handleProfileFormSubmit(
+function handleProfileFormSubmit(
   evt,
   nameInput,
   descriptionInput,
@@ -88,7 +88,7 @@ function renderCard(item, method = "prepend") {
 } 
 
 // Форма добавления карточки
-export function handleNewCardFormSubmit(
+function handleNewCardFormSubmit(
   evt,
   cardTitleInput,
   cardLinkInput,
