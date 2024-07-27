@@ -1,28 +1,29 @@
-// Открытие модального окна
-export function openModal(modal) {
-  modal.classList.add("popup_is-opened");
-  document.addEventListener("keydown", handleEscKey);
-}
+const config = {
+  popUpIsOpenSelector: ".popup_is-opened",
+  popUpIsOpenClass: "popup_is-opened",
+};
 
-// Закрытие модального окна
-export function closeModal(modal) {
-  modal.classList.remove("popup_is-opened");
-  document.removeEventListener("keydown", handleEscKey);
-}
-
-// Обработчик закрытия нажатием клавиши Esc
-function handleEscKey(event) {
+// Закрытие попапа по нажатию Escape
+function handleEscClose(event) {
   if (event.key === "Escape") {
-    const openedPopup = document.querySelector(".popup_is-opened");
-    if (openedPopup) {
-      closeModal(openedPopup);
-    }
+    const dialog = getOpenDialog();
+    close(dialog);
   }
 }
 
-// Обработчик события клика по оверлею
-export function closePopupByOverlay(event) {
-  if (event.target && event.target.classList.contains("popup")) {
-    closeModal(event.target);
-  }
+// Открытие попапа
+export function open(dialog) {
+  dialog.classList.add(config.popUpIsOpenClass);
+  document.addEventListener("keydown", handleEscClose);
+}
+
+// Закрытие попапа
+export function close(dialog) {
+  dialog.classList.remove(config.popUpIsOpenClass);
+  document.removeEventListener("keydown", handleEscClose);
+}
+
+// Поиск открытого попапа
+export function getOpenDialog() {
+  return document.querySelector(config.popUpIsOpenSelector);
 }

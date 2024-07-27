@@ -1,48 +1,77 @@
-const cardTemplate = document.querySelector("#card-template").content;
-const cardsContainer = document.querySelector(".places__list");
-export function toggleLike(evt) {
-  evt.target.classList.toggle('card__like-button_is-active');
-}
+const config = {
+  templateCardSelector: "#card-template",
+  cardSelector: ".card",
+  imageSelector: ".card__image",
+  titleSelector: ".card__title",
+  likeButtonSelector: ".card__button-like",
+  likeIconSelector: ".card__like-svg",
+  likeCountSelector: ".card__like-count",
+  cardDeleteSelector: ".card__button-delete",
+  cardLikeActiveClass: "card__button-like_active",
+};
 
-function createCard(
-  cardData,
-  deleteCallback,
-  handleImageClick,
-  toggleLike
+const cardTemplate = document.querySelector(
+  config.templateCardSelector
+).content;
+
+// Создание нового объекта разметки карточки
+export function create(
+  card,
+  openDialogDeleteCard,
+  funcLikeCard,
+  openDialogViewCard,
+  dialogViewCard,
+  profileId
 ) {
-  const cardElement = cardTemplate.cloneNode(true).querySelector(".card");
-  const cardTitle = cardElement.querySelector(".card__title");
-  const cardImage = cardElement.querySelector(".card__image");
-  const deleteButton = cardElement.querySelector(".card__delete-button");
+  const element = getCardTemplate(config.cardSelector);
+  const title = element.querySelector(config.titleSelector);
+  const image = element.querySelector(config.imageSelector);
+  const btnCardDelete = element.querySelector(config.cardDeleteSelector);
+  const btnLike = element.querySelector(config.likeButtonSelector);
+  const btnLikeCount = btnLike.querySelector(config.likeCountSelector);
+  const btnLikeIcon = btnLike.querySelector(config.likeIconSelector);
 
-  cardTitle.textContent = cardData.name;
-  cardImage.src = cardData.link;
-  cardImage.alt = cardData.name;
+  if (profileId === card.owner._id) {
+    btnCardDelete.addEventListener("click", (event) => {
+      const card = event.target.closest(".card");
+      openDialogDeleteCard(card);
+    });
+  } else element.querySelector(config.cardDeleteSelector).remove();
 
-  cardImage.addEventListener("click", () => handleImageClick(cardData));
+  if (isOwnerToLikedCard(card, profileId)) toggleIconActive(btnLikeIcon);
 
-  cardElement
-    .querySelector(".card__like-button")
-    .addEventListener("click", toggleLike);
+  element.id = card._id;
+  image.src = card.link;
+  image.alt = card.name;
+  title.textContent = card.name;
+  btnLikeCount.textContent = card.likes.length;
 
-  deleteButton.addEventListener("click", () => {
-    deleteCallback(cardElement);
+  image.addEventListener("click", (event) =>
+    openDialogViewCard(event, dialogViewCard)
+  );
+
+  btnLikeIcon.addEventListener("click", () => {
+    funcLikeCard(card, btnLikeCount, btnLikeIcon, toggleIconActive);
+    toggleIconActive(btnLikeIcon);
   });
-
-  return cardElement;
+  return element;
 }
 
-const deleteCard = (cardElement) => {
-  cardElement.remove();
-};
+// Проверка наличия лайка у карточки
+export function isOwnerToLikedCard(card, profileId) {
+  return card.likes.filter((el) => el._id === profileId).length > 0;
+}
 
-const renderCards = (cards, deleteHandler, handleImageClick, toggleLike) => {
-  const fragment = document.createDocumentFragment();
-  cards.forEach((cardData) => {
-    const cardElement = createCard(cardData, deleteHandler, handleImageClick, toggleLike);
-    fragment.append(cardElement);
-  });
-  cardsContainer.append(fragment);
-};
+// Переключение состояния иконки лайка
+export function toggleIconActive(btnLikeSvg) {
+  btnLikeSvg.classList.toggle(config.cardLikeActiveClass);
+}
 
-export { createCard, deleteCard, renderCards };
+// Удаление карточки из разметки
+export function remove(card) {
+  card.remove();
+}
+
+function getCardTemplate(selector) {
+  return cardTemplate.querySelector(selector).cloneNode(true);
+}

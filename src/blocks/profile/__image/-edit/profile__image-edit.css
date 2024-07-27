@@ -1,0 +1,6 @@
+.profile__image-edit {
+  position: absolute;
+  opacity: 0%;
+  top: calc(60px - 13px);
+  left: calc(60px - 13px);
+}
