@@ -43,6 +43,8 @@ const dialogCardViewCaption = dialogCardView.querySelector(".popup__caption");
 const formAddCard = document.forms.new_place;
 const formEditProfile = document.forms.edit_profile;
 const formEditAvatar = document.forms.edit_avatar;
+const btnSubmit = dialogDeleteCard.querySelector(".popup__button");
+let currentCard = null;
 
 /* Функции */
 
@@ -82,6 +84,13 @@ function loadCards(data) {
   });
 }
 
+// Навешиваем один раз глобально слушатель на кнопку подтверждения удаления
+btnDeleteCard.addEventListener("click", () => {
+  if (currentCard !== null) {
+    confirmationDeleteCard(currentCard, dialogDeleteCard, btnSubmit);
+  }
+});
+
 // Открыть попап
 function openDialog(modal, form) {
   clearValidation(form, validationConfig);
@@ -90,24 +99,24 @@ function openDialog(modal, form) {
 
 // Попап удаления карточки
 function openDialogDeleteCard(card) {
-  const submit = dialogDeleteCard.querySelector(".popup__button");
+  currentCard = card;
   Modal.open(dialogDeleteCard);
-  btnDeleteCard.addEventListener("click", () =>
-    confirmationDeleteCard(card, dialogDeleteCard, submit)
-  );
 }
 
-// Удаление карточки
 function confirmationDeleteCard(card, dialog, submit) {
-  submit.textContent = "Сохранение...";
+  const originalButtonText = submit.textContent;
+  submit.textContent = "Удаление...";
   api
     .deleteCard(card.id)
     .then(() => {
       Card.remove(card);
       Modal.close(dialog);
-      submit.textContent = "Сохранение";
+      submit.textContent = "Удалено";
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log(err))
+    .finally(() => {
+      submit.textContent = originalButtonText;
+    });
 }
 
 // Попап просмотра изображения карточки
@@ -123,63 +132,82 @@ function openDialogViewCard(evt, dialog) {
 
 // Сохранение профиля после редактирования
 function saveDialogEditProfile(event, form, title, description) {
-  const dialog = Modal.getOpenDialog();
+  event.preventDefault();
+
+  Modal.getOpenDialog();
+
   const name = form.name.value;
   const about = form.description.value;
-  const btn = dialog.querySelector(".popup__button");
+  const btn = dialogEditProfile.querySelector(".popup__button");
+  const originalButtonText = btn.textContent;
+
   btn.textContent = "Сохранение...";
-  event.preventDefault();
-  title.textContent = name;
-  description.textContent = about;
+
   api
     .patchProfile(name, about)
-    .then(() => Modal.close(dialog))
-    .catch((err) => console.log(err))
-    .finally(() => (btn.textContent = "Сохранить"));
+    .then(() => {
+      title.textContent = name;
+      description.textContent = about;
+      Modal.close(dialogEditProfile);
+    })
+    .catch((err) => {
+      console.log(err);
+      alert("Произошла ошибка при сохранении профиля. Попробуйте снова.");
+    })
+    .finally(() => {
+      btn.textContent = originalButtonText;
+    });
 }
 
 // Сохранение карточки после редактирования
 function saveDialogAddCard(event, form, cardListSelector) {
-  const dialog = Modal.getOpenDialog();
+  event.preventDefault();
+
+  Modal.getOpenDialog();
   const card = {
     name: form.name.value,
     link: form.link.value,
   };
-  const btn = dialog.querySelector(".popup__button");
+  const btn = dialogAddCard.querySelector(".popup__button");
+  const originalButtonText = btn.textContent;
+
   btn.textContent = "Сохранение...";
-  event.preventDefault();
-  new Promise(() => {
-    api
-      .postCard(card)
-      .then((res) => {
-        const card = Card.create(
-          res,
-          openDialogDeleteCard,
-          likedCard,
-          openDialogViewCard,
-          dialogCardView,
-          profileConfig.id
-        );
-        cardListSelector.insertBefore(card, cardListSelector.firstElementChild);
-        Modal.close(dialog);
-      })
-      .catch((err) => console.log(err))
-      .finally(() => (btn.textContent = "Сохранить"));
-  });
+
+  api
+    .postCard(card)
+    .then((res) => {
+      const cardElement = Card.create(
+        res,
+        openDialogDeleteCard,
+        likedCard,
+        openDialogViewCard,
+        dialogCardView,
+        profileConfig.id
+      );
+      cardListSelector.insertBefore(
+        cardElement,
+        cardListSelector.firstElementChild
+      );
+      Modal.close(dialogAddCard);
+    })
+    .catch((err) => console.log(err))
+    .finally(() => {
+      btn.textContent = originalButtonText;
+    });
 }
 
 // Сохранение информации о новом аватаре
 function updateProfileAvatar(event, form, selector) {
-  const dialog = Modal.getOpenDialog();
+  Modal.getOpenDialog();
   const link = form.link.value;
-  const btn = dialog.querySelector(".popup__button");
+  const btn = dialogEditAvatar.querySelector(".popup__button");
   btn.textContent = "Сохранение...";
   event.preventDefault();
   api
     .renewProfileAvatar(link)
     .then(() => {
       selector.src = link;
-      Modal.close(dialog);
+      Modal.close(dialogEditAvatar);
     })
     .catch((err) => console.log(err))
     .finally(() => (btn.textContent = "Сохранить"));
@@ -218,42 +246,46 @@ modals.forEach((form) => {
 
 // Открытие формы для изменения информации профиля
 btnProfileEdit.addEventListener("click", () => {
-  const args = [dialogEditProfile, formEditProfile];
-  openDialog(...args);
+  openDialog(dialogEditProfile, formEditProfile);
   formEditProfile.name.value = profileTitle.textContent;
   formEditProfile.description.value = profileDescription.textContent;
 });
 
 // Открытие формы для добавлния карточки
 btnCardAdd.addEventListener("click", () => {
-  const args = [dialogAddCard, formAddCard];
-  openDialog(...args);
+  openDialog(dialogAddCard, formAddCard);
 });
 
 // Сохранение информации о профиле
 formEditProfile.addEventListener("submit", (event) => {
-  const args = [event, formEditProfile, profileTitle, profileDescription];
-  saveDialogEditProfile(...args);
+  saveDialogEditProfile(
+    event,
+    formEditProfile,
+    profileTitle,
+    profileDescription
+  );
 });
 
 // Открытие формы для редактирования аватарки
 btnEditAvatar.addEventListener("click", () => {
-  const args = [dialogEditAvatar, formEditAvatar];
-  openDialog(...args);
+  openDialog(dialogEditAvatar, formEditAvatar);
 });
 
 // Сохранение аватара в профиле
 formEditAvatar.addEventListener("submit", function (event) {
-  const args = [event, formEditAvatar, avatarSelector];
-  updateProfileAvatar(...args);
+  updateProfileAvatar(event, formEditAvatar, avatarSelector);
 });
 
 // Сохранение новой картчоки
 formAddCard.addEventListener("submit", function (event) {
-  const args = [event, formAddCard, cardListSelector, Card.create, Card.remove];
-  saveDialogAddCard(...args);
+  saveDialogAddCard(
+    event,
+    formAddCard,
+    cardListSelector,
+    Card.create,
+    Card.remove
+  );
 });
-
 
 loadPage();
 enableValidation(document.forms, validationConfig);
