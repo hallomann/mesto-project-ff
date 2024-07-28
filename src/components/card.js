@@ -72,6 +72,12 @@ export function remove(card) {
   card.remove();
 }
 
+// Счетчик лайков
+export function updateLikedCard(data, card, count) {
+  card.likes = data.likes;
+  count.textContent = card.likes.length;
+}
+
 function getCardTemplate(selector) {
   return cardTemplate.querySelector(selector).cloneNode(true);
 }

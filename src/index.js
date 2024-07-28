@@ -20,7 +20,6 @@ const validationConfig = {
 
 const cardListSelector = document.querySelector(".places__list");
 const modals = document.querySelectorAll(".popup");
-const avatarSelector = document.querySelector(".profile__image");
 
 const profileAvatar = document.querySelector(".profile__image");
 const profileDescription = document.querySelector(".profile__description");
@@ -131,11 +130,10 @@ function openDialogViewCard(evt, dialog) {
 }
 
 // Сохранение профиля после редактирования
-function saveDialogEditProfile(event, form, title, description) {
+function saveDialogEditProfile(event) {
   event.preventDefault();
 
-  Modal.getOpenDialog();
-
+  const form = document.forms.edit_profile;
   const name = form.name.value;
   const about = form.description.value;
   const btn = dialogEditProfile.querySelector(".popup__button");
@@ -146,8 +144,8 @@ function saveDialogEditProfile(event, form, title, description) {
   api
     .patchProfile(name, about)
     .then(() => {
-      title.textContent = name;
-      description.textContent = about;
+      profileTitle.textContent = name;
+      profileDescription.textContent = about;
       Modal.close(dialogEditProfile);
     })
     .catch((err) => {
@@ -160,10 +158,12 @@ function saveDialogEditProfile(event, form, title, description) {
 }
 
 // Сохранение карточки после редактирования
-function saveDialogAddCard(event, form, cardListSelector) {
+function saveDialogAddCard(event) {
   event.preventDefault();
 
-  Modal.getOpenDialog();
+  const form = document.forms.new_place;
+  const cardListSelector = document.querySelector(".places__list");
+
   const card = {
     name: form.name.value,
     link: form.link.value,
@@ -196,21 +196,26 @@ function saveDialogAddCard(event, form, cardListSelector) {
     });
 }
 
-// Сохранение информации о новом аватаре
-function updateProfileAvatar(event, form, selector) {
-  Modal.getOpenDialog();
-  const link = form.link.value;
-  const btn = dialogEditAvatar.querySelector(".popup__button");
-  btn.textContent = "Сохранение...";
+// Сохранение нового аватара профиля
+function updateProfileAvatar(event) {
   event.preventDefault();
+
+  const link = formEditAvatar.link.value;
+  const btn = dialogEditAvatar.querySelector(".popup__button");
+  const originalButtonText = btn.textContent;
+
+  btn.textContent = "Сохранение...";
+
   api
     .renewProfileAvatar(link)
     .then(() => {
-      selector.src = link;
+      profileAvatar.src = link;
       Modal.close(dialogEditAvatar);
     })
     .catch((err) => console.log(err))
-    .finally(() => (btn.textContent = "Сохранить"));
+    .finally(() => {
+      btn.textContent = originalButtonText;
+    });
 }
 
 // Постановка лайка
@@ -218,20 +223,14 @@ function likedCard(card, count) {
   if (Card.isOwnerToLikedCard(card, profileConfig.id)) {
     api
       .deleteLikeCard(card._id)
-      .then((res) => updateLikedCard(res, card, count))
+      .then((res) => Card.updateLikedCard(res, card, count))
       .catch((err) => console.log(err));
   } else {
     api
       .putLikeCard(card._id)
-      .then((res) => updateLikedCard(res, card, count))
+      .then((res) => Card.updateLikedCard(res, card, count))
       .catch((err) => console.log(err));
   }
-}
-
-// Счетчик лайков
-function updateLikedCard(data, card, count) {
-  card.likes = data.likes;
-  count.textContent = card.likes.length;
 }
 
 /* События */
@@ -273,7 +272,7 @@ btnEditAvatar.addEventListener("click", () => {
 
 // Сохранение аватара в профиле
 formEditAvatar.addEventListener("submit", function (event) {
-  updateProfileAvatar(event, formEditAvatar, avatarSelector);
+  updateProfileAvatar(event, formEditAvatar, profileAvatar);
 });
 
 // Сохранение новой картчоки

@@ -83,7 +83,7 @@ const toggleButtonState = (inputs, submit, config) => {
   }
 };
 
-// Проверка формы на не валидные инпуты
+// Проверка формы на невалидные инпуты
 const hasInvalidInput = (inputs) => {
   return inputs.some((input) => !input.validity.valid);
 };
