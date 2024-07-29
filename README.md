@@ -5,7 +5,7 @@
 > ## ❓ Что это за проект?
 >
 > Веб-приложение для публикации карточек с фотографиями.
-> Ссылка на сайт: `https://hallomann.github.io/mesto-project-ff/`
+> Ссылка на сайт: https://hallomann.github.io/mesto-project-ff/
 
 ---
 

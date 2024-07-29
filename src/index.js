@@ -18,7 +18,7 @@ const validationConfig = {
   inactiveButtonClass: "popup__button-disabled",
 };
 
-const cardListSelector = document.querySelector(".places__list");
+const cardsList = document.querySelector(".places__list");
 const modals = document.querySelectorAll(".popup");
 
 const profileAvatar = document.querySelector(".profile__image");
@@ -79,7 +79,7 @@ function loadCards(data) {
       dialogCardView,
       profileConfig.id
     );
-    cardListSelector.append(card);
+    cardsList.append(card);
   });
 }
 
@@ -123,19 +123,20 @@ function openDialogViewCard(evt, dialog) {
   const card = evt.target.closest(".card");
   const cardTitle = card.querySelector(".card__title").textContent;
   const cardScr = card.querySelector(".card__image").src;
+
   dialogCardViewImage.src = cardScr;
   dialogCardViewImage.alt = cardTitle;
   dialogCardViewCaption.textContent = cardTitle;
-  Modal.open(dialog);
+
+  Modal.open(dialogCardView);
 }
 
 // Сохранение профиля после редактирования
 function saveDialogEditProfile(event) {
   event.preventDefault();
 
-  const form = document.forms.edit_profile;
-  const name = form.name.value;
-  const about = form.description.value;
+  const name = formEditProfile.name.value;
+  const about = formEditProfile.description.value;
   const btn = dialogEditProfile.querySelector(".popup__button");
   const originalButtonText = btn.textContent;
 
@@ -161,12 +162,9 @@ function saveDialogEditProfile(event) {
 function saveDialogAddCard(event) {
   event.preventDefault();
 
-  const form = document.forms.new_place;
-  const cardListSelector = document.querySelector(".places__list");
-
   const card = {
-    name: form.name.value,
-    link: form.link.value,
+    name: formAddCard.name.value,
+    link: formAddCard.link.value,
   };
   const btn = dialogAddCard.querySelector(".popup__button");
   const originalButtonText = btn.textContent;
@@ -184,9 +182,9 @@ function saveDialogAddCard(event) {
         dialogCardView,
         profileConfig.id
       );
-      cardListSelector.insertBefore(
+      cardsList.insertBefore(
         cardElement,
-        cardListSelector.firstElementChild
+        cardsList.firstElementChild
       );
       Modal.close(dialogAddCard);
     })
@@ -280,7 +278,7 @@ formAddCard.addEventListener("submit", function (event) {
   saveDialogAddCard(
     event,
     formAddCard,
-    cardListSelector,
+    cardsList,
     Card.create,
     Card.remove
   );
